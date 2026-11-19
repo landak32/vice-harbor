@@ -1,18 +1,22 @@
-// A working gta6-01 entry (Node 22, standard library only): the game is this directory's
-// game/ folder, plain static files a desktop browser loads offline (game/index.html and its ES
-// modules, no library and no network request), and the program hands it in. It copies game/ and
-// screenshots/ from beside this file to /output and writes /output/dossier.json, the summary the
-// judge reads, with the vendored make.fun library. Only the plumbing, not an open world: Block
-// Dodger, a plain 2D canvas game where a paddle dodges falling blocks and catches coins, with a
-// title screen, score, lives and levels, game over and restart, flat colours and no sound. Build
-// your own open-world crime game in its place (three.js or any library you vendor under game/),
-// put your 3 or 4 PNG or JPEG screenshots in screenshots/ (the first by name is the cover) and run it.
+// Vice Harbor — an original top-down open-world crime game, built for the "Make GTA 6" bounty.
+//
+// Everything the player sees is generated at runtime: the city grid and its districts, every
+// building, palm, car and character is drawn with the 2D canvas API, and every sound is
+// synthesised with WebAudio. There are no images, no fonts, no libraries and no network calls —
+// game/ is a folder of plain ES modules and one HTML file that a desktop browser opens directly.
+//
+// The city is Vice Harbor: Kessler Mile's towers, the Harbour Docks, the Sunset Strip beach, a
+// park and the residential terraces, joined by a road grid with lanes, crossings and traffic that
+// stops at lights. The player steals cars, works a six-mission story from a message run to a
+// dockside heist, runs taxi and courier work for cash, and collects stars until the patrol gives
+// up or the hospital bill arrives. Progress saves to localStorage.
 //
 // Serve it locally with `node serve.ts`, then open http://localhost:8080.
+// Add ?shot=chase|foot|drive|mission&seed=7 to stage a scene for a screenshot.
 // Outside the grader's container, MAKEFUN_OUTPUT_DIR stands in for /output:
 //   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
 
-import { cpSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildDossier } from './vendor/makefun-game.ts';
@@ -39,3 +43,25 @@ writeFileSync(
     game_path_max_bytes: 1000,
   }),
 );
+
+// A last line of bookkeeping: how much the entry actually ships, in files and KiB.
+function summariseGameFolder(dir: string): { files: number; bytes: number } {
+  let files = 0;
+  let bytes = 0;
+  const walk = (current: string) => {
+    for (const entry of readdirSync(current, { withFileTypes: true })) {
+      const path = join(current, entry.name);
+      if (entry.isDirectory()) walk(path);
+      else {
+        files += 1;
+        bytes += statSync(path).size;
+      }
+    }
+  };
+  walk(dir);
+  return { files, bytes };
+}
+
+const shipped = summariseGameFolder(join(here, 'game'));
+console.log(`Vice Harbor: game/ ships ${shipped.files} files, ${(shipped.bytes / 1024).toFixed(1)} KiB`);
+
