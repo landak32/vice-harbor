@@ -4,23 +4,22 @@
 [![rank](https://make.fun/badge/gta6-01/landak32/vice-harbor/rank.svg)](https://make.fun/bounty/gta6-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
 [![reward](https://make.fun/badge/gta6-01/landak32/vice-harbor/reward.svg)](https://make.fun/bounty/gta6-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
 
-Vice Harbor is an open-world crime game seen from directly overhead, and it exists entirely inside one browser tab. The streets, blocks, rooftops, cars, crowds and muzzle flashes are all painted onto a single 1280×720 canvas with the 2D drawing API, while the engine drone, the sirens and the gunfire are built on the fly with WebAudio oscillators and filtered noise.
+Vice Harbor is a crime game you look down on from above, and everything you see is drawn at runtime: a 1280×720 canvas, the 2D context, and no images at all. Streets, rooftops, the harbour, palm shadows, muzzle flashes, blood decals and the little figures on the pavement are shapes and gradients painted fresh every frame. Sound follows the same rule — the engine note tracks your speed, sirens are two-tone oscillators, gunfire is filtered noise, and the bassline that comes in when the patrol starts hunting you is sequenced from a handful of numbers rather than played from a file.
 
-The city is not a hand-drawn map. It is generated from a seed: the road grid, the shoreline, the harbour basin, the park pond and the placement of buildings all fall out of deterministic functions, so a given seed always rebuilds the same Vice Harbor. There are no textures, no sprite sheets, no audio files and nothing to compile — just plain ES modules loaded straight off disk, which means the whole project is a folder you can serve and play.
+The island itself is not authored, it is grown. A seed is fed into the layout builder, which lays down the east shoreline and the harbour basin first, then the park with its pond, then a seven-by-five grid of roads over whatever ground stayed dry, then one ring of pavement around every block. Buildings, props, intersections and the traffic-light phases all come off the same seed, so the default city rebuilds identically every time you load it and a different `?seed=` gives you a different one. Because there are no textures, no sprite sheets and no audio files, there is also nothing to build: the project is plain ES modules, and the only thing between the folder and a playable game is a static file server.
 
-Underneath the scenery sits a small simulation running at a fixed 60 updates a second. Cars follow lane waypoints and respect the lights, pedestrians walk the pavement rings and scatter when shots ring out, and every crime feeds a heat meter that decides how hard the patrol comes after you. Story jobs and repeatable side work give the money a purpose, and the important parts of your progress are kept in localStorage so a reload does not wipe the run.
+What holds it together is a simulation that advances in fixed 1/60-second steps regardless of your frame rate. Cars follow a lane graph and obey the lights, crowds walk block rings and break for the crosswalks, and every crime you commit is tallied into a single heat value that decides whether the street is quiet or full of cruisers. On top of that sits a six-chapter story with speaking characters, two repeatable jobs for when you need money, and a save file in localStorage that remembers the parts of your run that would hurt to lose.
 
 ## What's in it
 
-- **Five districts on one island.** Kessler Mile's downtown towers in the north-east, the Anchor Docks and its piers on the south-west water, Coral Strand's beach along the east shore, Palmetto Park in the middle, and the Sunset Terraces houses filling the rest.
-- **Two ways to get around.** Walk, jog or sprint on foot, or step into any car you find and drive it; each vehicle's mass, grip and steering carry straight into how it handles.
-- **Six vehicle classes.** The Riptide GT sports car, the Meridian sedan, the Boxer Van, the Sunline Cab taxi, the Harbor Patrol cruiser and the Ironhorse Hauler truck — from a drifty coupe to a slow, planted three-tonne rig.
-- **Traffic with manners.** Civilian cars follow the lane graph, brake for red lights and for the car ahead, and panic — swerving and running the lights — when a shot goes off nearby.
-- **Crowds that react.** Pedestrians stroll the pavements, cross at the painted corners, flee from trouble and can be knocked flat by a bumper.
-- **A 1–5 star wanted system.** Crimes add heat, heat turns into stars, the patrol sends more cruisers and officers as it climbs, and the stars only fade once you have stayed out of sight.
-- **Six story missions plus side jobs.** A campaign that runs from a first errand to a dockside score, with taxi fares for Nadine and courier parcels for Lulu available whenever you need cash between chapters.
-- **Save and continue.** Money, weapons, ammo, unlocked jobs, finished missions and statistics go to localStorage, so closing the tab is not the same as starting over.
-- **A full HUD.** A rotating minimap, health and armour bars, your cash, the current weapon, the wanted stars and the live objective, all drawn over the world.
+- **Five districts on one island.** Kessler Mile puts the towers in the north-east, Anchor Docks holds the south-west water with two finger piers, Coral Strand runs along the east shore behind a strip of sand, Palmetto Park sits in the middle around a pond, and Sunset Terraces fills the remaining blocks with low houses. Each district carries its own asphalt, roof and window palette, and downtown buildings get extra wall depth so the skyline reads from overhead.
+- **On foot or behind the wheel.** You walk, run or sprint as a person with a collision radius and a facing; press E near a car and the same camera follows the car instead. Steering turns harder the faster you are going, grip decides how quickly sideways speed bleeds off, and two collision circles along the body stand in for the chassis — which is why a long truck nudges things aside and a light coupe slides.
+- **Six vehicle classes.** The Riptide GT is the fast, loose one; the Meridian is the neutral all-rounder; the Boxer Van and Sunline Cab are the working cars; the Harbor Patrol Cruiser is quick and heavy enough to end a chase; and the Ironhorse Hauler weighs three times a coupe and turns like it.
+- **Traffic that behaves, crowds that don't.** Civilian cars hold a lane, steer for the next waypoint, brake for a red light or the bumper ahead, and lean on the horn when stuck. Pedestrians walk the pavement ring of a block, cross where the paint is, get knocked flat by a bumper, and scatter when a shot goes off nearby — as do the cars, which will run the lights for a few seconds in panic.
+- **A 1–5 star wanted system.** Carjacking, gunfire, hitting a pedestrian, shooting an officer and blowing something up each add a different amount of heat. Heat crosses thresholds into stars, stars decide how many cruisers and officers the patrol puts on the street, and nothing cools down until no officer or cruiser has had eyes on you for several seconds. Get grabbed on foot at a high star count and you are arrested rather than killed.
+- **Six story missions and two side jobs.** Cold Cargo, Tail Light, Payday at the Palms, Night Shift, Harbor Lights and High Tide run from a crate on the pier to a showdown at midnight, with dialogue between Cass Rourke, Odell Moss, Cyrus Pike, Sgt. Hale, Nadine and Lulu. Between chapters you can drive the cab for Nadine or run three parcels for Lulu's courier desk, both repeatable and both paid per stop.
+- **Save and continue.** Money, the equipped weapon, pistol and SMG ammo, unlocked guns, completed missions and your running statistics are written to `localStorage` under a versioned key, and the title screen grows a CONTINUE entry once a save exists.
+- **A HUD drawn over the world.** A rotating minimap with the job marker, health and armour bars, your cash, the wanted stars, the current weapon or a speedometer with engine wear while driving, the live objective line, the district name and clock, toast messages, and a dialogue box with a generated portrait of whoever is talking.
 
 ## Run it
 
@@ -28,11 +27,11 @@ Underneath the scenery sits a small simulation running at a fixed 60 updates a s
 node serve.ts
 ```
 
-The game is then at http://localhost:8080. It uses only the Node standard library, so there is nothing to install.
+Then open http://localhost:8080. It is Node 22 with the standard library only — no install step, no bundler.
 
 ## Controls
 
-- **WASD or arrow keys** — move on foot, or steer once you are behind the wheel
+- **WASD or arrow keys** — move on foot, or steer once you are in a car
 - **E** — enter or leave a vehicle
 - **Space** — sprint
 - **Left click or J** — fire
